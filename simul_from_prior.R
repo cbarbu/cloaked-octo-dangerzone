@@ -1,9 +1,11 @@
 source("RanalysisFunctions.R") # at least for set_to
 source("functions_migration_simul.R") # for gillespie code
+
 maps.tot<-read.csv("roc_p.i_fromIadjustedwithII.csv")
 blocks<-read.csv("maps_hunter_blocks.csv")
+
 # focusing on hunter for now
-maps<-maps.tot[which(maps.tot$D==7),]
+maps<-maps.tot[which(maps.tot$D==7 & maps.tot$X>226000 & maps.tot$Y>8179000 & maps.tot$Y<8180000),]
 
 par(mfrow=c(1,3))
 plot_reel(maps$X,maps$Y,maps$infested,base=0)
@@ -65,5 +67,9 @@ dist_out <- makeDistClasses(as.vector(maps$X), as.vector(maps$Y), c(0, 100))
 blockIndex <- blocks$block_num
 bad <- which(is.na(blockIndex))
 blockIndex[bad] <- max(blockIndex[-bad])+(1:length(bad))
-infestedDens <- simul_priors_gillespie(prob_inf_vec = maps$est_p.i_da, blockIndex = blockIndex, endTime = 7*52, Nrep = 100, rateMove, seed, halfDistJ = halfDistJ, halfDistH = halfDistH, useDelta = useDelta, delta = delta, rateHopInMove = rateHopInMove, rateSkipInMove = rateSkipInMove, rateJumpInMove = rateJumpInMove, dist_out = dist_out)
+infestedDens <- simul_priors_gillespie(prob_inf_vec = maps$est_p.i_da, blockIndex = blockIndex, endTime = 7*52, Nrep = 100, rateMove, seed, halfDistJ = halfDistJ, halfDistH = halfDistH, useDelta = useDelta, delta = delta, rateHopInMove = rateHopInMove, rateSkipInMove = rateSkipInMove, rateJumpInMove = rateJumpInMove, dist_out = dist_out$dists)
+
+par(mfrow=c(1,2))
+plot_reel(maps$X,maps$Y,maps$est_p.i_da,base=0)
+plot_reel(maps$X,maps$Y,infestedDens,base=0)
 

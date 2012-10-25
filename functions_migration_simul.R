@@ -557,7 +557,7 @@ if(class(importOk)!="try-error"){
 	  	L<-length(prob_inf_vec)
 		infestedDens<-rep(0,L)
 
-		dist_mat <- dist_out$dists
+		dist_mat <- dist_out
 		
 		if(is.null(cumulProbMat)){
 			cumulProbMat <- mat.or.vec(L, L)
@@ -567,7 +567,7 @@ if(class(importOk)!="try-error"){
 		}
 		
 		
-		out<- .C("simul_priors_gillespie",
+		out<- .C("simul_priors_gillespie",DUP=FALSE,NAOK=TRUE,
 			 prob_inf_vec = as.numeric(prob_inf_vec),
 			 L = as.integer(L),
 			 Nrep = as.integer(Nrep),
