@@ -566,6 +566,8 @@ if(class(importOk)!="try-error"){
 			useProbMat <- TRUE
 		}
 		
+		ageMat <- mat.or.vec(L, Nrep)
+		infestedMat <- mat.or.vec(L, Nrep)	
 		
 		out<- .C("simul_priors_gillespie",DUP=FALSE,NAOK=TRUE,
 			 prob_inf_vec = as.numeric(prob_inf_vec),
@@ -585,12 +587,16 @@ if(class(importOk)!="try-error"){
 			 blockIndex = as.integer(blockIndex),
 			 endTime = as.numeric(endTime),
 			 scale = as.numeric(rateMove),
-			 seed = as.integer(seed)
-			 )
+			 seed = as.integer(seed),
+			 ageMat = as.numeric(ageMat),
+			 infestedMat = as.integer(infestedMat)
+			)
 
 		out$infestedDens<-out$infestedDens/Nrep
+		out$ageMat <- matrix(out$ageMat, byrow = TRUE, nrow = Nrep)
+		out$infestedMat <- matrix(out$infestedMat, byrow = TRUE, nrow = Nrep)
 
-		return(out$infestedDens)
+		return(list(infestedDens = out$infestedDens, ageMat = out$ageMat, infestedMat = out$infestedMat))
 
 	}
 

@@ -479,7 +479,6 @@ void modBinItWithStreets(int* n, int* dist_index, double* inf_data, int* cbin, i
 void gillespie(int *infested, int *endIndex, int *L, double *probMat, double *endTime, int *indexInfest, double *age, double *movePerTunit, int *seed){
 
 	jcong = (unsigned long)*seed;
-	// printf("seed: %li \n",jcong);
 
 	double rand = UNICONG;
 	
@@ -490,10 +489,9 @@ void gillespie(int *infested, int *endIndex, int *L, double *probMat, double *en
 	double currentTime = 0;
 
 	//the gillespie loop
-	// printf("entering gillespie loop (endtime: %.4f)",*endTime);
 	while(currentTime + nextEvent < *endTime){
-		// printf("time %f Ninf %i ", currentTime, *endIndex+1);
-		fflush(stdout);
+
+		// fflush(stdout);
 		
 		currentTime+=nextEvent;
 
@@ -502,18 +500,15 @@ void gillespie(int *infested, int *endIndex, int *L, double *probMat, double *en
 		int index = (int)(rand* (*endIndex+1));
 		int house = *(indexInfest + index);
 
-		// printf("infesting: %i; ", house);
-
 		//pick a new house to become infested from the infesting house
 		rand = UNICONG;
-		double *pinit=probMat+house* *L;
-		// printf("h:%i, rand :%.4f in [%.4f;%.4f]; ",
-		// 		house,rand,*pinit,*(pinit+*L-1));
+		double *pinit = probMat+house* *L;
+
 		// fflush(stdout);
 		
 		int dest = fulldichot(pinit, rand, 0, *L-1);
-		// ///printf("new infested: %i\n", dest);
-		// ///fflush(stdout);
+		
+		// fflush(stdout);
 		
 		if((*(infested+dest)) != 1){
 			*endIndex+=1;
@@ -526,11 +521,12 @@ void gillespie(int *infested, int *endIndex, int *L, double *probMat, double *en
 		rand = UNICONG;
 		nextEvent = log(1-rand)/(-*movePerTunit * (*endIndex+1));
 	}
-	*seed=(int)jcong;
+
+	*seed= (int)jcong;
 	// printf("final seed:%i",*seed);
 }
 
-void simul_priors_gillespie(double* prob_inf_vec, int* L, int* Nrep, int* infestedDens, double* probMat, int* useProbMat, double* distMat, double* halfDistJ, double* halfDistH, int* useDelta, double* delta, double* rateHopInMove, double* rateSkipInMove, double* rateJumpInMove, int* blockIndex, double *endTime, double *scale, int* seed)
+void simul_priors_gillespie(double* prob_inf_vec, int* L, int* Nrep, int* infestedDens, double* probMat, int* useProbMat, double* distMat, double* halfDistJ, double* halfDistH, int* useDelta, double* delta, double* rateHopInMove, double* rateSkipInMove, double* rateJumpInMove, int* blockIndex, double *endTime, double *scale, int* seed, double* ageMat, int* infestedMat)
 {
 
 	if(*useProbMat != 1){
@@ -552,12 +548,13 @@ void simul_priors_gillespie(double* prob_inf_vec, int* L, int* Nrep, int* infest
 		int count = 0;
 		double prob = 0.0;
 		double rand = 0.0;
+		int endIndex = 0;
 
 		// draw the starting infestation based on prob_inf_vec
 		for(int house = 0; house < *L; house++){
 
 			age[house] = -1;
-			indexInfestInit[house] = 0;
+			indexInfestInit[house] = -1;
 
 			prob = prob_inf_vec[house];
 			rand = UNICONG;
@@ -567,17 +564,24 @@ void simul_priors_gillespie(double* prob_inf_vec, int* L, int* Nrep, int* infest
 				age[count] = 0;
 				indexInfestInit[count] = house;
 				count++;
+				
+				//printf("%d ", house);				
+
 			}else{
 				infestedInit[house] = 0;
 			}
 		}
+		
+		printf("rep:%i count: %d \n", rep, count);
  
-		int endIndex = count - 1; 
+		endIndex = count - 1; 
 
-		gillespie(infestedInit,&endIndex,L,probMat,endTime,indexInfestInit,age,scale,seed);
+		gillespie(infestedInit, &endIndex, L, probMat, endTime, indexInfestInit, age, scale, seed);
 
 		for(int h=0;h<*L;h++){
 	 			infestedDens[h]+=infestedInit[h];
+				ageMat[h+rep* *L] = age[h];
+				infestedMat[h+rep* *L] = indexInfestInit[h];
 		}
 	}
 	
