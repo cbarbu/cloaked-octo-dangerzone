@@ -588,7 +588,7 @@ if(class(importOk)!="try-error"){
 			 seed = as.integer(seed)
 			 )
 
-		out$infestedDens<-out$infestedDens/(Nrep*length(rateMove));
+		out$infestedDens<-out$infestedDens/Nrep
 
 		return(out$infestedDens)
 
