@@ -548,8 +548,13 @@ if(class(importOk)!="try-error"){
 		return(out)
 	}
 
-	# to make this faster, in the future, just pass probMat
-	simul_priors_gillespie<-function(prob_inf_vec, blockIndex, endTime, Nrep, rateMove, seed = 1, cumulProbMat = NULL, halfDistJ = -1, halfDistH = -1, useDelta = -1, delta = -1, rateHopInMove = -1, rateSkipInMove = -1, rateJumpInMove = -1, dist_out){
+	# faster if cumulProbMat passed
+	# if cumulProbMat not passed, need to pass all variables default set to -1
+	# runs Nrep gillespie simulations after drawing initial starting houses from prob_inf_vec
+	# returns infestation density per house
+	#	  age matrix for each gillespie simulation with the ages of the infested houses
+	#	  infestation matrix for each gillespie with the locations of the infested houses
+	simul_priors_gillespie<-function(prob_inf_vec, blockIndex, endTime, Nrep, rateMove, seed = 1, cumulProbMat = NULL, halfDistJ = -1, halfDistH = -1, useDelta = -1, delta = -1, rateHopInMove = -1, rateSkipInMove = -1, rateJumpInMove = -1, dist_out = -1){
 		
 		# seed <- runif(1, 1, 2^31-1)
 		#for random seeding of stochastic simulation	
@@ -566,6 +571,8 @@ if(class(importOk)!="try-error"){
 			useProbMat <- TRUE
 		}
 		
+		ageMat <- mat.or.vec(L, Nrep)
+		infestedMat <- mat.or.vec(L, Nrep)	
 		
 		out<- .C("simul_priors_gillespie",DUP=FALSE,NAOK=TRUE,
 			 prob_inf_vec = as.numeric(prob_inf_vec),
@@ -585,12 +592,16 @@ if(class(importOk)!="try-error"){
 			 blockIndex = as.integer(blockIndex),
 			 endTime = as.numeric(endTime),
 			 scale = as.numeric(rateMove),
-			 seed = as.integer(seed)
-			 )
+			 seed = as.integer(seed),
+			 ageMat = as.numeric(ageMat),
+			 infestedMat = as.integer(infestedMat)
+			)
 
-		out$infestedDens<-out$infestedDens/(Nrep*length(rateMove));
+		out$infestedDens<-out$infestedDens/Nrep
+		out$ageMat <- matrix(out$ageMat, byrow = TRUE, nrow = Nrep)
+		out$infestedMat <- matrix(out$infestedMat, byrow = TRUE, nrow = Nrep)
 
-		return(out$infestedDens)
+		return(list(infestedDens = out$infestedDens, ageMat = out$ageMat, infestedMat = out$infestedMat))
 
 	}
 
