@@ -140,7 +140,7 @@ void makeDistClasses(double *xc // x of objects
 			distance = hypot(xc[i] - xc[j], yc[i] - yc[j]);
 			index = findIndex(distance, *nbbreaks, breaks, *maxdist);
 			*(dists + i* *L+j) = distance;
-			// *(dists + j* *L+i) = distance;
+			*(dists + j* *L+i) = distance;
 			*(indices + i* *L+j) = index;
 			
 			if(index != -1)
@@ -526,6 +526,10 @@ void gillespie(int *infested, int *endIndex, int *L, double *probMat, double *en
 	// printf("final seed:%i",*seed);
 }
 
+// pass probMat to make this faster
+// for each Nrep
+// first, draw the starting infested houses based on prob_inf_vec
+// run gillespie from starting infested houses until endTime
 void simul_priors_gillespie(double* prob_inf_vec, int* L, int* Nrep, int* infestedDens, double* probMat, int* useProbMat, double* distMat, double* halfDistJ, double* halfDistH, int* useDelta, double* delta, double* rateHopInMove, double* rateSkipInMove, double* rateJumpInMove, int* blockIndex, double *endTime, double *scale, int* seed, double* ageMat, int* infestedMat)
 {
 

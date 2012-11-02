@@ -548,8 +548,13 @@ if(class(importOk)!="try-error"){
 		return(out)
 	}
 
-	# to make this faster, in the future, just pass probMat
-	simul_priors_gillespie<-function(prob_inf_vec, blockIndex, endTime, Nrep, rateMove, seed = 1, cumulProbMat = NULL, halfDistJ = -1, halfDistH = -1, useDelta = -1, delta = -1, rateHopInMove = -1, rateSkipInMove = -1, rateJumpInMove = -1, dist_out){
+	# faster if cumulProbMat passed
+	# if cumulProbMat not passed, need to pass all variables default set to -1
+	# runs Nrep gillespie simulations after drawing initial starting houses from prob_inf_vec
+	# returns infestation density per house
+	#	  age matrix for each gillespie simulation with the ages of the infested houses
+	#	  infestation matrix for each gillespie with the locations of the infested houses
+	simul_priors_gillespie<-function(prob_inf_vec, blockIndex, endTime, Nrep, rateMove, seed = 1, cumulProbMat = NULL, halfDistJ = -1, halfDistH = -1, useDelta = -1, delta = -1, rateHopInMove = -1, rateSkipInMove = -1, rateJumpInMove = -1, dist_out = -1){
 		
 		# seed <- runif(1, 1, 2^31-1)
 		#for random seeding of stochastic simulation	
